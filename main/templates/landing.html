@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Landing Page{% endblock %}
+{% load static %}
+
+{% block content %}
+
+<head>
+    <title>Landing Page</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles/landing.css' %}">
+</head>
+
+<div class="landing-container">
+    <div class="leaderboard-section">
+        <h2>LEADERBOARD</h2>
+        {% for user in top_users %}
+        <div class="leaderboard-item">
+            <img id="avatar" class="avatar" src="{{ user.profile_picture.url }}">
+            <div class="leaderboard-details">
+                <p><strong>{{ user.fullname }}</strong></p>
+                <p>{{ user.school }}</p>
+            </div>
+            <p class="points">{{ user.total_points}} pts</p>
+        </div>
+        {% empty %}
+            <p>No users to display.</p>
+        {% endfor %}
+    </div>
+
+    <div class="news-feed-section">
+        <h2>NEWS FEED</h2>
+        {% if latest_news %}
+        <h3>{{ latest_news.headline }}</h3>
+            {% if latest_news.photo %}
+                <img id="photo" class="news-image" src="{{ latest_news.photo.url }}" alt="News Image">
+            {% endif %}
+         <p>{{ latest_news.body }}</p>
+        {% else %}
+        <p>No news available at the moment. Add the first news item!</p>
+    {% endif %}
+    </div>
+
+</div>
+{% endblock %}

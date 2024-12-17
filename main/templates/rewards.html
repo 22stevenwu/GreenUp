@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Rewards List{% endblock %}
+{% load static %}
+
+{% block content %}
+
+<head>
+    <title>Rewards List</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'styles/campaign_page.css' %}">
+</head>
+
+<body>
+
+    <div class="title-container">
+        <h1 class="title">Rewards List</h1>
+        {% if user and not user.supervisor %}
+            <a href="{% url 'actions' %}" class="create-campaign-btn" style="margin: 20px;">Points: {{ user.current_points }}</a>
+        {% endif %}
+    </div>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <p class="messages {{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+
+
+    {% if user and user.supervisor %}
+        <a href="{% url 'rewards_create' %}" class="create-campaign-btn">Add Reward</a>
+    {% endif %}
+
+    <div class="campaign-container">
+        <div class="column">
+            <h2>Active Rewards</h2>
+            {% if active_rewards %}
+                <ul>
+    {% for reward_info in active_rewards %}
+    <div class="campaign-item">
+        <div class="campaign-title">
+            {{ reward_info.reward.name }}
+        </div>
+        <div class="campaign-dates">
+            {{ reward_info.reward.startdate }} - {{ reward_info.reward.enddate }}
+        </div>
+        <div class="campaign-points">
+            Points Required: {{ reward_info.reward.pointsrequired }}
+        </div>
+        <div class="campaign-description">
+            Description: {{ reward_info.reward.description }}
+        </div>
+        {% if reward_info.reward.image %}
+            <div class="reward-image">
+                <img src="{{ reward_info.reward.image.url }}" alt="{{ reward_info.reward.name }}">
+            </div>
+        {% endif %}
+        <div class="remaining">
+            Total Remaining Amount: {{ reward_info.remaining_amount }}
+        </div>
+        <div class="user-remaining">
+            Your Remaining Amount: {{ reward_info.user_remaining_amount }}
+        </div>
+
+        
+        {% if not user.supervisor %}
+            {% if reward_info.reward.expired == False and reward_info.redemption_count < reward_info.reward.userredeemlimit %}
+                <form method="post" action="{% url 'reward_redeem' reward_info.reward.id %}">
+                    {% csrf_token %}
+                    <button type="submit">Redeem</button>
+                </form>
+            {% elif reward_info.redemption_count >= reward_info.reward.userredeemlimit %}
+                <p>Your redeem limit reached</p>
+            {% elif reward_info.reward.redeemedamount >= reward_info.reward.totalamount %}
+                <p>None remaining</p>
+            {% elif reward_info.reward.expired == True %}
+                <p>Expired</p>
+            {% endif %}
+        {% endif %}
+    </div>
+    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No active rewards.</p>
+            {% endif %}
+        </div>
+
+
+
+
+
+
+    {% if user and user.supervisor %}
+        <div class="column">
+            <h2>Expired Rewards</h2>
+            {% if expired_rewards %}
+                <ul>
+                    {% for reward in expired_rewards %}
+                            <div class="campaign-item">
+                                <div class="campaign-title">{{reward.name}}</div>
+                                <div class="campaign-dates">{{reward.startdate}} - {{reward.enddate}}</div>
+                                <div class="campaign-points">Points Required: {{ reward.pointsrequired }}</div>
+                                <div class="campaign-description">Description: {{reward.description}}</div>
+
+                                {% if reward.image %}
+                                    <div class="reward-image">
+                                        <img src="{{ reward.image.url }}" alt="{{ reward.name }}">
+                                    </div>
+                                {% endif %}
+                                {% if reward.redeemedamount >= reward.totalamount %}
+                                    <p>None remaining</p>
+                                {% else %}
+                                    <p>Still some remaining but expired</p>
+                                {% endif %}
+
+                            </div>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No expired rewards.</p>
+            {% endif %}
+            </div>
+    {% endif %}
+
+</body>
+
+{% endblock %}

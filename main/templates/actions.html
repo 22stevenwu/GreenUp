@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Actions{% endblock %}
+
+{% load static %}
+
+{% block content %}
+<head>
+    <link rel="stylesheet" href="{% static 'styles/actions.css' %}">
+</head>
+
+<body>
+    <h1 class="title">{{ user.fullname }}'s Activity List</h1>
+
+    {% if activities %}
+        <div class="table-container">
+            <table class="activity-table">
+                <thead>
+                    <tr>
+                        <th>Activity Name</th>
+                        <th>Points</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activity in activities %}
+                    <tr>
+                        <td>
+                            {% if "Reward" in activity.0|lower %}
+                                <span class="reward-name">{{ activity.0 }}</span>
+                            {% elif "Campaign" in activity.0 %}
+                                <span class="campaign-name">{{ activity.0 }}</span>
+                            {% else %}
+                                <span>{{ activity.0 }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if activity.1 < 0 %}
+                                <span class="points-deducted">{{ activity.1 }}</span>
+                            {% else %}
+                                <span class="points-added">+{{ activity.1 }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ activity.2|date:"F j, Y, g:i a" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="no-activities">No activities found.</p>
+    {% endif %}
+</body>
+{% endblock %}
